@@ -1,21 +1,19 @@
-import { useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import Dashboard from './pages/admin/Dashboard'
+import ProductList from './pages/admin/ProductList'
+import ProductForm from './pages/admin/ProductForm'
 
 function App() {
-  const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    fetch('http://localhost:8000')
-      .then(response => response.json())
-      .then(data => setMessage(data.message))
-  }, [])
-
-  return(
-    <div>
-      <h1>Mart</h1>
-      <p>Message from backend: {message}</p>
-    </div>
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/admin" element={<Dashboard />} />
+      <Route path="/admin/products" element={<ProductList />} />
+      <Route path="/admin/products/new" element={<ProductForm />} />
+      <Route path="/admin/products/edit/:id" element={<ProductForm />} />
+    </Routes>
   )
 }
-
 
 export default App

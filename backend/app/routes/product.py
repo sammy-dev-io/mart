@@ -16,6 +16,13 @@ def get_products(db: Session = Depends(get_db)):
     products = db.query(Product).filter(Product.is_active == True).all()
     return products
 
+
+# GET all products for admin (includes inactive)
+@router.get("/admin/all", response_model=List[ProductResponse])
+def get_all_products_admin(db: Session = Depends(get_db)):
+    products = db.query(Product).all()
+    return products
+
 # Get a single product by ID
 @router.get("/{product_id}", response_model=ProductResponse)
 def get_product(product_id: int, db: Session = Depends(get_db)):
