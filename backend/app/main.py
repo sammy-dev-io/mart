@@ -9,9 +9,7 @@ load_dotenv()
 # Now import database-dependent things AFTER load_dotenv
 from app.database import engine, Base
 from app import models
-
-# Create all database tables
-Base.metadata.create_all(bind=engine)
+from app.routes.product import router as product_router
 
 # Create the FastAPI application instance
 app = FastAPI(
@@ -28,6 +26,13 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept"],
 )
+
+# Create all database tables
+Base.metadata.create_all(bind=engine)
+
+
+# Import Routers from main.py 
+app.include_router(product_router)
 
 # Root endpoint
 @app.get("/")

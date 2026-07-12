@@ -6,7 +6,7 @@ class ProductBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
     price: float = Field(..., gt=0)
-    original_Price: Optional[float] = Field(None, gt=0)
+    original_price: Optional[float] = Field(None, gt=0)
     category: str = Field (..., min_length=1, max_length=100)
     image: Optional[str] = None
     stock: str = Field(default="in")
