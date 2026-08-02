@@ -11,6 +11,11 @@ function Dashboard() {
   })
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/login')
+}
 
   useEffect(() => {
     fetchStats()
@@ -39,6 +44,20 @@ function Dashboard() {
   return (
     <div style={{ padding: '2rem' }}>
       <h1>Admin Dashboard</h1>
+      <button
+    onClick={handleLogout}
+    style={{ 
+        float: 'right', 
+        padding: '0.5rem 1rem',
+        backgroundColor: '#c00',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer'
+    }}
+>
+    Logout
+</button>
       <p style={{ color: '#666', marginBottom: '2rem' }}>
         Welcome back. Here is your store summary.
       </p>

@@ -10,6 +10,8 @@ load_dotenv()
 from app.database import engine, Base
 from app import models
 from app.routes.product import router as product_router
+from app.routes.auth import router as auth_router
+
 
 # Create the FastAPI application instance
 app = FastAPI(
@@ -33,6 +35,8 @@ Base.metadata.create_all(bind=engine)
 
 # Import Routers from main.py 
 app.include_router(product_router)
+
+app.include_router(auth_router)
 
 # Root endpoint
 @app.get("/")

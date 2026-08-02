@@ -4,6 +4,7 @@ from typing import List
 from app.database import get_db
 from app.models.product import Product
 from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
+from app.utils.auth import get_admin_user
 
 router = APIRouter(
     prefix="/products",
@@ -17,9 +18,12 @@ def get_products(db: Session = Depends(get_db)):
     return products
 
 
-# GET all products for admin (includes inactive)
+# GET all products for admin (includes inactive) — PROTECTED
 @router.get("/admin/all", response_model=List[ProductResponse])
-def get_all_products_admin(db: Session = Depends(get_db)):
+def get_all_products_admin(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
     products = db.query(Product).all()
     return products
 
@@ -31,35 +35,54 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product with ID {product_id} not found")
     return product
 
-# POST create a new product 
+# POST create a new product — PROTECTED
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+def create_product(
+    product: ProductCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
     new_product = Product(**product.model_dump())
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
     return new_product
 
-# PUT Update a product
+
+# PUT update a product — PROTECTED
 @router.put("/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, updated: ProductUpdate, db: Session = Depends(get_db)):
+def update_product(
+    product_id: int,
+    updated: ProductUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product with ID {product_id} not found")
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Product with id {product_id} not found"
+        )
     for field, value in updated.model_dump(exclude_unset=True).items():
         setattr(product, field, value)
-    
     db.commit()
     db.refresh(product)
     return product
 
-# DELETE a product
+
+# DELETE a product — PROTECTED
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product with ID {product_id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Product with id {product_id} not found"
+        )
     product.is_active = False
     db.commit()
     return None
