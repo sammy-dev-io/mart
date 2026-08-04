@@ -1,6 +1,9 @@
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
+import Cart from './pages/Cart'
+import Checkout from './pages/Checkout'
+import Orders from './pages/Orders'
 import Dashboard from './pages/admin/Dashboard'
 import ProductList from './pages/admin/ProductList'
 import ProductForm from './pages/admin/ProductForm'
@@ -11,6 +14,25 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/cart" element={<Cart />} />
+
+      <Route path="/checkout" element={
+        <ProtectedRoute>
+          <Checkout />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/orders" element={
+        <ProtectedRoute>
+          <Orders />
+        </ProtectedRoute>
+      } />
+
+      <Route path="/orders/:orderId" element={
+        <ProtectedRoute>
+          <Orders />
+        </ProtectedRoute>
+      } />
 
       <Route path="/admin" element={
         <ProtectedRoute adminOnly={true}>
