@@ -6,6 +6,8 @@ from app.models.order import Order, OrderItem
 from app.models.product import Product
 from app.schemas.order import OrderCreate, OrderStatusUpdate, OrderResponse
 from app.utils.auth import get_current_user, get_admin_user
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+
 
 router = APIRouter(
     prefix="/orders",
@@ -143,8 +145,18 @@ def update_order_status(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid status. Must be one of: {', '.join(valid_statuses)}"
         )
-
+    
     order.status = status_update.status
     db.commit()
     db.refresh(order)
     return order
+
+@router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+async def place_order(
+    request: Request,
+    order_data: OrderCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    body = await request.body()
+    print("RAW BODY:", body)

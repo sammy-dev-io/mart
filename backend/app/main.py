@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from app.routes.order import router as order_router
+from app.routes.payment import router as payment_router
 
 # Load environment variables FIRST before anything else
 load_dotenv()
@@ -40,6 +41,8 @@ app.include_router(product_router)
 app.include_router(auth_router)
 
 app.include_router(order_router)
+
+app.include_router(payment_router)
 
 # Root endpoint
 @app.get("/")

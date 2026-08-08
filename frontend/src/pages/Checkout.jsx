@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import API from '../api/axios'
@@ -16,13 +16,17 @@ function Checkout() {
 
   const user = JSON.parse(localStorage.getItem('user') || 'null')
 
-  if (!user) {
-    navigate('/login')
-    return null
-  }
+  useEffect(() => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    if (cartItems.length === 0) {
+      navigate('/cart')
+    }
+  }, [])
 
-  if (cartItems.length === 0) {
-    navigate('/cart')
+  if (!user || cartItems.length === 0) {
     return null
   }
 
@@ -48,8 +52,17 @@ function Checkout() {
       }
 
       const response = await API.post('/orders/', orderPayload)
+      const order = response.data
+
+      navigate('/payment', {
+        state: {
+          orderId: order.id,
+          orderTotal: order.total,
+          userEmail: user.email
+        }
+      })
+
       clearCart()
-      navigate(`/orders/${response.data.id}`)
 
     } catch (err) {
       setError('Failed to place order. Please try again.')
@@ -65,7 +78,6 @@ function Checkout() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
 
-        {/* Left — Delivery Form */}
         <div>
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Delivery Details</h2>
 
@@ -124,7 +136,6 @@ function Checkout() {
           </form>
         </div>
 
-        {/* Right — Order Summary */}
         <div>
           <h2 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Order Summary</h2>
           <div style={{ border: '1px solid #eee', borderRadius: '8px', overflow: 'hidden' }}>

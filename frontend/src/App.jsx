@@ -8,6 +8,8 @@ import Dashboard from './pages/admin/Dashboard'
 import ProductList from './pages/admin/ProductList'
 import ProductForm from './pages/admin/ProductForm'
 import ProtectedRoute from './components/ProtectedRoute'
+import Payment from './pages/Payment'
+import PaymentCallback from './pages/PaymentCallback'
 
 function App() {
   return (
@@ -57,8 +59,22 @@ function App() {
           <ProductForm />
         </ProtectedRoute>
       } />
+
+      <Route path="/payment" element={
+  <ProtectedRoute>
+    <Payment />
+  </ProtectedRoute>
+} />
+
+<Route path="/payment/callback" element={
+  <ProtectedRoute>
+    <PaymentCallback />
+  </ProtectedRoute>
+} />
+
     </Routes>
   )
 }
+
 
 export default App
