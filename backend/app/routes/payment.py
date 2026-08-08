@@ -1,14 +1,12 @@
-from urllib import response
-
 import requests
 import os
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from app.database import get_db
 from app.models.order import Order
 from app.utils.auth import get_current_user
-import uuid
 
 router = APIRouter(
     prefix="/payments",
@@ -31,9 +29,6 @@ def initialize_payment(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    print("Initialize payment called with:", data.order_id, data.email)
-    print("Secret key exists:", bool(PAYSTACK_SECRET_KEY))
-    
     order = db.query(Order).filter(Order.id == data.order_id).first()
 
     if not order:
@@ -62,15 +57,15 @@ def initialize_payment(
     }
 
     payload = {
-    "email": data.email,
-    "amount": amount_in_kobo,
-    "reference": f"MART-{order.id}-{uuid.uuid4().hex[:10]}",
-    "callback_url": "http://localhost:5173/payment/callback",
-    "metadata": {
-        "order_id": order.id,
-        "user_id": current_user.id
+        "email": data.email,
+        "amount": amount_in_kobo,
+        "reference": f"MART-{order.id}-{uuid.uuid4().hex[:10]}",
+        "callback_url": "http://localhost:5173/payment/callback",
+        "metadata": {
+            "order_id": order.id,
+            "user_id": current_user.id
+        }
     }
-}
 
     response = requests.post(
         "https://api.paystack.co/transaction/initialize",
@@ -78,15 +73,11 @@ def initialize_payment(
         headers=headers
     )
 
-    print("Paystack status:", response.status_code)
-    print("Paystack response:", response.text)
-
     if response.status_code != 200:
-        print("Paystack error:", response.text)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=response.json()
-    )
+            detail="Failed to initialize payment"
+        )
 
     return response.json()
 
