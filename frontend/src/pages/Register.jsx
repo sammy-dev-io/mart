@@ -2,8 +2,13 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import API from '../api/axios'
 
-function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' })
+function Register() {
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  })
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -15,26 +20,21 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      return
+    }
     try {
       setLoading(true)
       setError(null)
-
-      const response = await API.post('/auth/login', formData)
-      const { access_token } = response.data
-      localStorage.setItem('token', access_token)
-
-      const userResponse = await API.get('/auth/me', {
-        headers: { Authorization: `Bearer ${access_token}` }
+      await API.post('/auth/register', {
+        full_name: formData.full_name,
+        email: formData.email,
+        password: formData.password
       })
-      localStorage.setItem('user', JSON.stringify(userResponse.data))
-
-      if (userResponse.data.is_admin) {
-        navigate('/admin')
-      } else {
-        navigate('/')
-      }
+      navigate('/login')
     } catch (err) {
-      setError('Invalid email or password. Please try again.')
+      setError(err.response?.data?.detail || 'Registration failed. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -44,13 +44,11 @@ function Login() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-600">Mart</h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <p className="text-gray-500 mt-2">Create your account</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
 
           {error && (
@@ -60,6 +58,21 @@ function Login() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Full Name
+              </label>
+              <input
+                type="text"
+                name="full_name"
+                value={formData.full_name}
+                onChange={handleChange}
+                required
+                placeholder="John Doe"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -86,7 +99,22 @@ function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                placeholder="••••••••"
+                placeholder="At least 6 characters"
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                placeholder="Repeat your password"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
               />
             </div>
@@ -96,15 +124,15 @@ function Login() {
               disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 rounded-xl transition-colors"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
 
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 font-medium hover:underline">
-              Create one
+            Already have an account?{' '}
+            <Link to="/login" className="text-indigo-600 font-medium hover:underline">
+              Sign in
             </Link>
           </p>
 
@@ -114,4 +142,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Register
