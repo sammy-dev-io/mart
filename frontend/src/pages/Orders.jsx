@@ -82,6 +82,20 @@ function Orders() {
     }
   }
 
+  const handleCancelOrder = async (order) => {
+    if (!window.confirm('Are you sure you want to cancel this order?')) return
+    try {
+      await API.put(`/orders/${order.id}/cancel`)
+      if (singleOrder) {
+        navigate('/orders')
+      } else {
+        setOrders(prev => prev.filter(o => o.id !== order.id))
+      }
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to cancel order')
+    }
+}
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
@@ -133,23 +147,30 @@ function Orders() {
           {/* Pending payment banner */}
           {isPending && (
             <div
-              className="rounded-2xl p-5 mb-6 flex items-center justify-between gap-4 flex-wrap"
+              className="rounded-2xl p-5 mb-6"
               style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}
             >
-              <div>
-                <p className="font-bold text-sm" style={{ color: '#d97706' }}>Payment Pending</p>
-                <p className="text-sm mt-0.5" style={{ color: '#d97706', opacity: 0.8 }}>
-                  This order has not been paid for yet. Complete your payment to proceed.
-                </p>
+              <p className="font-bold text-sm" style={{ color: '#d97706' }}>Payment Pending</p>
+              <p className="text-sm mt-0.5 mb-4" style={{ color: '#d97706', opacity: 0.8 }}>
+                This order has not been paid for yet. Complete your payment to proceed, or cancel it.
+              </p>
+              <div className="flex gap-3 flex-wrap">
+                <button
+                  onClick={() => handleCompletePayment(singleOrder)}
+                  disabled={payLoading}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all text-white"
+                  style={{ background: '#f59e0b' }}
+                >
+                  {payLoading ? 'Processing...' : 'Complete Payment'}
+                </button>
+                <button
+                  onClick={() => handleCancelOrder(singleOrder)}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all"
+                  style={{ border: '1px solid rgba(244,63,94,0.3)', color: '#e11d48' }}
+                >
+                  Cancel Order
+                </button>
               </div>
-              <button
-                onClick={() => handleCompletePayment(singleOrder)}
-                disabled={payLoading}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all"
-                style={{ background: '#f59e0b', color: '#fff' }}
-              >
-                {payLoading ? 'Processing...' : 'Complete Payment'}
-              </button>
             </div>
           )}
 
@@ -324,14 +345,23 @@ function Orders() {
                     <span className="text-xs font-medium" style={{ color: '#d97706' }}>
                       Awaiting payment
                     </span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleCompletePayment(order) }}
-                      disabled={payLoading}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition-all flex-shrink-0"
-                      style={{ background: '#f59e0b' }}
-                    >
-                      Pay Now
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCancelOrder(order) }}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all flex-shrink-0"
+                        style={{ border: '1px solid rgba(244,63,94,0.3)', color: '#e11d48' }}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleCompletePayment(order) }}
+                        disabled={payLoading}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg text-white transition-all flex-shrink-0"
+                        style={{ background: '#f59e0b' }}
+                      >
+                        Pay Now
+                      </button>
+                    </div>
                   </div>
                 )}
 

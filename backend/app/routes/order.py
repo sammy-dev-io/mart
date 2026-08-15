@@ -80,10 +80,10 @@ def get_my_orders(
     current_user = Depends(get_current_user)
 ):
     orders = db.query(Order).filter(
-        Order.user_id == current_user.id
+        Order.user_id == current_user.id,
+        Order.status != "cancelled"
     ).order_by(Order.created_at.desc()).all()
     return orders
-
 
 @router.get("/", response_model=List[OrderResponse])
 def get_all_orders(
@@ -140,6 +140,37 @@ def update_order_status(
         )
 
     order.status = status_update.status
+    db.commit()
+    db.refresh(order)
+    return order
+
+@router.put("/{order_id}/cancel", response_model=OrderResponse)
+def cancel_own_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found"
+        )
+
+    if order.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only cancel your own orders"
+        )
+
+    if order.status != "pending":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only pending orders can be cancelled"
+        )
+
+    order.status = "cancelled"
     db.commit()
     db.refresh(order)
     return order
