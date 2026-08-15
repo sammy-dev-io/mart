@@ -1,1 +1,95 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #0f172a;
+    --accent: #f59e0b;
+    --accent-hover: #d97706;
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text: #09090b;
+    --muted: #71717a;
+    --success: #10b981;
+    --error: #f43f5e;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  button {
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+  }
+}
+
+aside nav div::-webkit-scrollbar {
+  width: 4px;
+}
+
+aside nav div::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside nav div::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.916);
+  border-radius: 10px;
+}
+
+aside nav div::-webkit-scrollbar-thumb:hover {
+  background: rgba(9, 9, 11, 0.5);
+}

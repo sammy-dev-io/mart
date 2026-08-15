@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import API from '../../api/axios'
+import { AdminLayout } from './Dashboard'
 
 const STOCK_OPTIONS  = [
   { value: 'in',  label: 'In Stock' },
@@ -10,19 +11,19 @@ const STOCK_OPTIONS  = [
 
 const BADGE_OPTIONS = [
   { value: '',     label: 'None' },
-  { value: 'hot',  label: '🔥 Hot' },
-  { value: 'sale', label: '🏷️ Sale' },
-  { value: 'new',  label: '✨ New' },
+  { value: 'hot',  label: 'Hot' },
+  { value: 'sale', label: 'Sale' },
+  { value: 'new',  label: 'New' },
 ]
 
 function ProductForm() {
   const { id }       = useParams()
   const navigate     = useNavigate()
   const isEditing    = Boolean(id)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading]   = useState(false)
   const [fetching, setFetching] = useState(isEditing)
-  const [error, setError]     = useState(null)
-  const [success, setSuccess] = useState(false)
+  const [error, setError]       = useState(null)
+  const [success, setSuccess]   = useState(false)
   const [formData, setFormData] = useState({
     name: '', description: '', price: '',
     original_price: '', category: '', image: '',
@@ -39,15 +40,9 @@ function ProductForm() {
       const response = await API.get(`/products/${id}`)
       const p = response.data
       setFormData({
-        name:           p.name || '',
-        description:    p.description || '',
-        price:          p.price || '',
-        original_price: p.original_price || '',
-        category:       p.category || '',
-        image:          p.image || '',
-        stock:          p.stock || 'in',
-        badge:          p.badge || '',
-        rating:         p.rating || 0
+        name: p.name || '', description: p.description || '', price: p.price || '',
+        original_price: p.original_price || '', category: p.category || '', image: p.image || '',
+        stock: p.stock || 'in', badge: p.badge || '', rating: p.rating || 0
       })
     } catch (err) {
       setError('Failed to fetch product')
@@ -66,23 +61,16 @@ function ProductForm() {
     try {
       setLoading(true)
       setError(null)
-
       const payload = {
         ...formData,
-        price:          parseFloat(formData.price),
+        price: parseFloat(formData.price),
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        rating:         parseFloat(formData.rating)
+        rating: parseFloat(formData.rating)
       }
-
-      if (isEditing) {
-        await API.put(`/products/${id}`, payload)
-      } else {
-        await API.post('/products/', payload)
-      }
-
+      if (isEditing) await API.put(`/products/${id}`, payload)
+      else await API.post('/products/', payload)
       setSuccess(true)
       setTimeout(() => navigate('/admin/products'), 1200)
-
     } catch (err) {
       setError('Failed to save product. Please check all fields.')
     } finally {
@@ -90,223 +78,136 @@ function ProductForm() {
     }
   }
 
+  const inputStyle = { border: '1px solid var(--border)' }
+  const handleFocus = (e) => e.target.style.borderColor = '#f59e0b'
+  const handleBlur  = (e) => e.target.style.borderColor = 'var(--border)'
+
   if (fetching) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: 'var(--border)', borderTopColor: '#f59e0b' }}></div>
+        </div>
+      </AdminLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AdminLayout>
+      <div className="p-4 sm:p-6 lg:p-8 max-w-2xl">
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Link to="/admin/products" className="text-gray-400 hover:text-gray-600 transition-colors">
-              ← Products
-            </Link>
-            <span className="text-gray-300">|</span>
-            <h1 className="text-xl font-bold text-gray-900">
-              {isEditing ? 'Edit Product' : 'Add New Product'}
-            </h1>
-          </div>
+        <div className="flex items-center gap-3 mb-6">
+          <Link to="/admin/products" className="text-sm" style={{ color: 'var(--muted)' }}>← Products</Link>
+          <span style={{ color: 'var(--border)' }}>|</span>
+          <h1 className="text-lg sm:text-xl font-black" style={{ color: 'var(--primary)' }}>
+            {isEditing ? 'Edit Product' : 'Add New Product'}
+          </h1>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Success */}
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-5 flex items-center gap-2 text-sm">
-            <span>✅</span>
+          <div className="rounded-xl p-4 mb-5 text-sm" style={{ background: 'rgba(16,185,129,0.08)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)' }}>
             Product {isEditing ? 'updated' : 'created'} successfully! Redirecting...
           </div>
         )}
 
-        {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
+          <div className="rounded-xl p-4 mb-5 text-sm" style={{ background: 'rgba(244,63,94,0.08)', color: '#e11d48', border: '1px solid rgba(244,63,94,0.2)' }}>
             {error}
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl p-4 sm:p-6" style={{ border: '1px solid var(--border)' }}>
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Product Name *</label>
+              <input type="text" name="name" value={formData.name} onChange={handleChange} required
                 placeholder="e.g. Classic White Shirt"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
-            {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={3}
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Description</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} rows={3}
                 placeholder="Describe the product..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
-              />
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all resize-none"
+                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
-            {/* Price Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Price (₦) *
-                </label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  min="0"
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Price (₦) *</label>
+                <input type="number" name="price" value={formData.price} onChange={handleChange} required min="0"
                   placeholder="25000"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                />
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                  style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Original Price (₦)
-                  <span className="text-gray-400 font-normal ml-1 text-xs">— for sale items</span>
-                </label>
-                <input
-                  type="number"
-                  name="original_price"
-                  value={formData.original_price}
-                  onChange={handleChange}
-                  min="0"
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Original Price (₦)</label>
+                <input type="number" name="original_price" value={formData.original_price} onChange={handleChange} min="0"
                   placeholder="35000"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                />
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                  style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
               </div>
             </div>
 
-            {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Category *
-              </label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                required
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Category *</label>
+              <input type="text" name="category" value={formData.category} onChange={handleChange} required
                 placeholder="e.g. Electronics, Fashion, Home"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
-            {/* Image URL */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Image URL
-              </label>
-              <input
-                type="text"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Image URL</label>
+              <input type="text" name="image" value={formData.image} onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
               {formData.image && (
-                <div className="mt-2 w-20 h-20 rounded-xl overflow-hidden border border-gray-200">
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                    onError={(e) => { e.target.style.display = 'none' }}
-                  />
+                <div className="mt-2 w-20 h-20 rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                  <img src={formData.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none' }} />
                 </div>
               )}
             </div>
 
-            {/* Stock + Badge Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Stock Status
-                </label>
-                <select
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                >
-                  {STOCK_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Stock Status</label>
+                <select name="stock" value={formData.stock} onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none bg-white"
+                  style={inputStyle}>
+                  {STOCK_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Badge
-                </label>
-                <select
-                  name="badge"
-                  value={formData.badge}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-                >
-                  {BADGE_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Badge</label>
+                <select name="badge" value={formData.badge} onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none bg-white"
+                  style={inputStyle}>
+                  {BADGE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* Rating */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Rating
-                <span className="text-gray-400 font-normal ml-1 text-xs">(0 – 5)</span>
-              </label>
-              <input
-                type="number"
-                name="rating"
-                value={formData.rating}
-                onChange={handleChange}
-                min="0"
-                max="5"
-                step="0.1"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Rating (0 – 5)</label>
+              <input type="number" name="rating" value={formData.rating} onChange={handleChange} min="0" max="5" step="0.1"
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
             </div>
 
-            {/* Buttons */}
-            <div className="flex gap-3 pt-2">
-              <button
-                type="submit"
-                disabled={loading || success}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-              >
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button type="submit" disabled={loading || success}
+                className="flex-1 font-bold py-3 rounded-xl transition-colors text-sm text-white"
+                style={{ background: loading || success ? '#fbbf24' : '#f59e0b' }}>
                 {loading ? 'Saving...' : isEditing ? 'Update Product' : 'Add Product'}
               </button>
-              <Link
-                to="/admin/products"
-                className="flex-1 text-center border border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-              >
+              <Link to="/admin/products"
+                className="flex-1 text-center font-bold py-3 rounded-xl text-sm transition-colors"
+                style={{ border: '1px solid var(--border)', color: 'var(--text)' }}>
                 Cancel
               </Link>
             </div>
@@ -314,7 +215,7 @@ function ProductForm() {
           </form>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   )
 }
 

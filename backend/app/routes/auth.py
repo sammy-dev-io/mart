@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserRegister, UserLogin, UserResponse, Token
-from app.utils.auth import hash_password, verify_password, create_access_token
+from app.utils.auth import get_admin_user, hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.utils.auth import get_current_user
 
@@ -97,8 +97,41 @@ def login_for_token(
         "token_type": "bearer"
     }
 
+@router.get("/users", response_model=list[UserResponse])
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return users
 
 # GET current logged in user
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user = Depends(get_current_user)):
     return current_user
+
+@router.put("/users/{user_id}/status")
+def toggle_user_status(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_admin_user)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if user.id == current_user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot deactivate your own admin account")
+    user.is_active = not user.is_active
+    db.commit()
+    db.refresh(user)
+    return {"id": user.id, "is_active": user.is_active}
+
+
+@router.put("/deactivate")
+def deactivate_own_account(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    current_user.is_active = False
+    db.commit()
+    return {"message": "Your account has been deactivated"}

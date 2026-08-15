@@ -28,11 +28,8 @@ function Login() {
       })
       localStorage.setItem('user', JSON.stringify(userResponse.data))
 
-      if (userResponse.data.is_admin) {
-        navigate('/admin')
-      } else {
-        navigate('/')
-      }
+      if (userResponse.data.is_admin) navigate('/admin')
+      else navigate('/')
     } catch (err) {
       setError('Invalid email or password. Please try again.')
     } finally {
@@ -41,20 +38,26 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
       <div className="w-full max-w-md">
 
-        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600">Mart</h1>
-          <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <Link to="/" className="inline-flex items-center gap-2">
+            <span className="text-3xl font-black" style={{ color: 'var(--primary)' }}>MART</span>
+            <span className="text-xs font-bold px-1.5 py-0.5 rounded text-white" style={{ background: '#f59e0b' }}>
+              STORE
+            </span>
+          </Link>
+          <p className="mt-3 text-sm" style={{ color: 'var(--muted)' }}>Sign in to your account</p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white rounded-2xl p-8" style={{ border: '1px solid var(--border)' }}>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+            <div
+              className="px-4 py-3 rounded-xl mb-6 text-sm"
+              style={{ background: 'rgba(244,63,94,0.08)', color: '#e11d48', border: '1px solid rgba(244,63,94,0.2)' }}
+            >
               {error}
             </div>
           )}
@@ -62,7 +65,7 @@ function Login() {
           <form onSubmit={handleSubmit} className="space-y-5">
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>
                 Email Address
               </label>
               <input
@@ -72,12 +75,15 @@ function Login() {
                 onChange={handleChange}
                 required
                 placeholder="you@example.com"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={{ border: '1px solid var(--border)' }}
+                onFocus={(e) => e.target.style.borderColor = '#f59e0b'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>
                 Password
               </label>
               <input
@@ -87,23 +93,27 @@ function Login() {
                 onChange={handleChange}
                 required
                 placeholder="••••••••"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+                style={{ border: '1px solid var(--border)' }}
+                onFocus={(e) => e.target.style.borderColor = '#f59e0b'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold py-3 rounded-xl transition-colors"
+              className="w-full font-bold py-3 rounded-xl transition-colors text-sm text-white"
+              style={{ background: loading ? '#fbbf24' : '#f59e0b' }}
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
 
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm mt-6" style={{ color: 'var(--muted)' }}>
             Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 font-medium hover:underline">
+            <Link to="/register" className="font-semibold hover:underline" style={{ color: '#f59e0b' }}>
               Create one
             </Link>
           </p>

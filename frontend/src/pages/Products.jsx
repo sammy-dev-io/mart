@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import API from '../api/axios'
-import { useCart } from '../context/CartContext'
+import { useCart } from '../context/CartContext'  
+import { Link } from 'react-router-dom'
 
 const CATEGORIES = [
   'All', 'Electronics', 'Fashion', 'Home', 'Beauty', 'Food', 'Sports'
@@ -36,6 +37,11 @@ function Products() {
     const cat = searchParams.get('category')
     if (cat) setCategory(cat)
   }, [searchParams])
+
+  useEffect(() => {
+  const searchParam = searchParams.get('search')
+  if (searchParam) setSearch(searchParam)
+}, [searchParams])
 
   useEffect(() => {
     applyFilters()
@@ -119,7 +125,7 @@ function Products() {
       </div>
 
       {/* Search + Filter Bar */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
 
         {/* Search */}
         <div className="flex-1 relative">
@@ -134,7 +140,7 @@ function Products() {
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
         </div>
-
+        <div className="flex gap-3">
         {/* Sort */}
         <select
           value={sort}
@@ -162,7 +168,7 @@ function Products() {
           )}
         </button>
       </div>
-
+    </div>
       {/* Category Chips */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
         {CATEGORIES.map(cat => (
@@ -303,7 +309,8 @@ function ProductCard({ product, onAddToCart }) {
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
-      <div className="relative overflow-hidden bg-gray-50 h-48">
+  <Link to={`/products/${product.id}`} className="block">
+  <div className="relative overflow-hidden bg-gray-50 h-48">
         <img
           src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
           alt={product.name}
@@ -322,7 +329,7 @@ function ProductCard({ product, onAddToCart }) {
           )}
         </div>
       </div>
-
+    </Link>
       <div className="p-3">
         <p className="text-xs text-indigo-600 font-medium uppercase tracking-wide mb-1">{product.category}</p>
         <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 leading-snug">{product.name}</h3>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import API from '../../api/axios'
+import { AdminLayout } from './Dashboard'
 
 function ProductList() {
   const [products, setProducts] = useState([])
@@ -29,9 +30,7 @@ function ProductList() {
     if (!window.confirm('Deactivate this product?')) return
     try {
       await API.delete(`/products/${id}`)
-      setProducts(products.map(p =>
-        p.id === id ? { ...p, is_active: false } : p
-      ))
+      setProducts(products.map(p => p.id === id ? { ...p, is_active: false } : p))
     } catch (err) {
       alert('Failed to delete product')
     }
@@ -43,91 +42,74 @@ function ProductList() {
   )
 
   const STOCK_STYLES = {
-    in:  'bg-green-50 text-green-700',
-    low: 'bg-yellow-50 text-yellow-700',
-    out: 'bg-red-50 text-red-700',
+    in:  { bg: 'rgba(16,185,129,0.1)', text: '#059669' },
+    low: { bg: 'rgba(245,158,11,0.1)', text: '#d97706' },
+    out: { bg: 'rgba(244,63,94,0.1)',  text: '#e11d48' },
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AdminLayout>
+      <div className="p-4 sm:p-6 lg:p-8">
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin"
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              ← Dashboard
-            </Link>
-            <span className="text-gray-300">|</span>
-            <h1 className="text-xl font-bold text-gray-900">All Products</h1>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <h1 className="text-xl sm:text-2xl font-black" style={{ color: 'var(--primary)' }}>All Products</h1>
           <Link
             to="/admin/products/new"
-            className="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-indigo-700 transition-colors text-sm"
+            className="text-center font-bold px-4 py-2.5 rounded-xl text-sm text-white transition-all"
+            style={{ background: '#f59e0b' }}
           >
             + Add Product
           </Link>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        {/* Search */}
         <div className="relative mb-5 max-w-sm">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none"
+            style={{ border: '1px solid var(--border)' }}
           />
         </div>
 
-        {/* Count */}
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm mb-4" style={{ color: 'var(--muted)' }}>
           {filtered.length} product{filtered.length !== 1 ? 's' : ''}
         </p>
 
         {loading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-16 animate-pulse border border-gray-100"></div>
+              <div key={i} className="bg-white rounded-2xl h-16 animate-pulse" style={{ border: '1px solid var(--border)' }}></div>
             ))}
           </div>
         ) : error ? (
-          <div className="text-center py-10 text-red-500">{error}</div>
+          <div className="text-center py-10" style={{ color: '#e11d48' }}>{error}</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-4xl mb-3">📦</div>
-            <p className="text-gray-500">No products found</p>
+            <p style={{ color: 'var(--muted)' }}>No products found</p>
           </div>
         ) : (
           <>
             {/* Desktop Table */}
-            <div className="hidden md:block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="hidden md:block bg-white rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)' }}>
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100">
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Product</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Price</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Stock</th>
-                    <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                    <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Product</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Category</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Price</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Stock</th>
+                    <th className="text-left px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Status</th>
+                    <th className="text-right px-5 py-3.5 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--muted)' }}>Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody>
                   {filtered.map(product => (
-                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={product.id} style={{ borderBottom: '1px solid var(--bg)' }}>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style={{ background: 'var(--bg)' }}>
                             <img
                               src={product.image || 'https://via.placeholder.com/40'}
                               alt={product.name}
@@ -136,25 +118,31 @@ function ProductList() {
                             />
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900 text-sm">{product.name}</p>
-                            <p className="text-gray-400 text-xs">ID: {product.id}</p>
+                            <p className="font-semibold text-sm" style={{ color: 'var(--primary)' }}>{product.name}</p>
+                            <p className="text-xs" style={{ color: 'var(--muted)' }}>ID: {product.id}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-sm text-gray-600 capitalize">{product.category}</td>
+                      <td className="px-5 py-4 text-sm capitalize" style={{ color: 'var(--text)' }}>{product.category}</td>
                       <td className="px-5 py-4">
-                        <p className="font-semibold text-gray-900 text-sm">₦{product.price.toLocaleString()}</p>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--primary)' }}>₦{product.price.toLocaleString()}</p>
                         {product.original_price && (
-                          <p className="text-xs text-gray-400 line-through">₦{product.original_price.toLocaleString()}</p>
+                          <p className="text-xs line-through" style={{ color: 'var(--muted)' }}>₦{product.original_price.toLocaleString()}</p>
                         )}
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STOCK_STYLES[product.stock]}`}>
+                        <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: STOCK_STYLES[product.stock].bg, color: STOCK_STYLES[product.stock].text }}>
                           {product.stock === 'in' ? 'In Stock' : product.stock === 'low' ? 'Low Stock' : 'Out of Stock'}
                         </span>
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${product.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <span
+                          className="text-xs font-medium px-2.5 py-1 rounded-full"
+                          style={{
+                            background: product.is_active ? 'rgba(16,185,129,0.1)' : 'rgba(15,23,42,0.06)',
+                            color: product.is_active ? '#059669' : 'var(--muted)'
+                          }}
+                        >
                           {product.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -162,14 +150,16 @@ function ProductList() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => navigate(`/admin/products/edit/${product.id}`)}
-                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium transition-colors"
+                            className="text-sm font-medium transition-colors"
+                            style={{ color: '#f59e0b' }}
                           >
                             Edit
                           </button>
-                          <span className="text-gray-200">|</span>
+                          <span style={{ color: 'var(--border)' }}>|</span>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="text-red-400 hover:text-red-600 text-sm font-medium transition-colors"
+                            className="text-sm font-medium transition-colors"
+                            style={{ color: '#f43f5e' }}
                           >
                             Deactivate
                           </button>
@@ -184,9 +174,9 @@ function ProductList() {
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
               {filtered.map(product => (
-                <div key={product.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <div key={product.id} className="bg-white rounded-2xl p-4" style={{ border: '1px solid var(--border)' }}>
                   <div className="flex gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0" style={{ background: 'var(--bg)' }}>
                       <img
                         src={product.image || 'https://via.placeholder.com/48'}
                         alt={product.name}
@@ -195,31 +185,31 @@ function ProductList() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm truncate">{product.name}</p>
-                      <p className="text-xs text-gray-500 capitalize">{product.category}</p>
-                      <p className="font-bold text-indigo-600 text-sm mt-0.5">₦{product.price.toLocaleString()}</p>
+                      <p className="font-semibold text-sm truncate" style={{ color: 'var(--primary)' }}>{product.name}</p>
+                      <p className="text-xs capitalize" style={{ color: 'var(--muted)' }}>{product.category}</p>
+                      <p className="font-bold text-sm mt-0.5" style={{ color: '#f59e0b' }}>₦{product.price.toLocaleString()}</p>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STOCK_STYLES[product.stock]}`}>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: STOCK_STYLES[product.stock].bg, color: STOCK_STYLES[product.stock].text }}>
                         {product.stock === 'in' ? 'In Stock' : product.stock === 'low' ? 'Low' : 'Out'}
                       </span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${product.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      <span
+                        className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{
+                          background: product.is_active ? 'rgba(16,185,129,0.1)' : 'rgba(15,23,42,0.06)',
+                          color: product.is_active ? '#059669' : 'var(--muted)'
+                        }}
+                      >
                         {product.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </div>
                     <div className="flex gap-3">
-                      <button
-                        onClick={() => navigate(`/admin/products/edit/${product.id}`)}
-                        className="text-indigo-600 text-sm font-medium"
-                      >
+                      <button onClick={() => navigate(`/admin/products/edit/${product.id}`)} className="text-sm font-medium" style={{ color: '#f59e0b' }}>
                         Edit
                       </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-400 text-sm font-medium"
-                      >
+                      <button onClick={() => handleDelete(product.id)} className="text-sm font-medium" style={{ color: '#f43f5e' }}>
                         Deactivate
                       </button>
                     </div>
@@ -230,7 +220,7 @@ function ProductList() {
           </>
         )}
       </div>
-    </div>
+    </AdminLayout>
   )
 }
 

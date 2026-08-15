@@ -2,19 +2,50 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const CartContext = createContext()
 
+function getCartKey() {
+  const user = JSON.parse(localStorage.getItem('user') || 'null')
+  return user ? `cart_${user.id}` : 'cart_guest'
+}
+
 export function CartProvider({ children }) {
+  const [cartKey, setCartKey] = useState(getCartKey())
+
   const [cartItems, setCartItems] = useState(() => {
     try {
-      const saved = localStorage.getItem('cart')
+      const saved = localStorage.getItem(getCartKey())
       return saved ? JSON.parse(saved) : []
     } catch {
       return []
     }
   })
 
+  // Watch for login/logout changes and reload the correct cart
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems))
-  }, [cartItems])
+    const checkUserChange = () => {
+      const newKey = getCartKey()
+      if (newKey !== cartKey) {
+        setCartKey(newKey)
+        try {
+          const saved = localStorage.getItem(newKey)
+          setCartItems(saved ? JSON.parse(saved) : [])
+        } catch {
+          setCartItems([])
+        }
+      }
+    }
+
+    window.addEventListener('storage', checkUserChange)
+    const interval = setInterval(checkUserChange, 500)
+
+    return () => {
+      window.removeEventListener('storage', checkUserChange)
+      clearInterval(interval)
+    }
+  }, [cartKey])
+
+  useEffect(() => {
+    localStorage.setItem(cartKey, JSON.stringify(cartItems))
+  }, [cartItems, cartKey])
 
   const addToCart = (product) => {
     setCartItems(prev => {
@@ -22,9 +53,7 @@ export function CartProvider({ children }) {
       if (existing) {
         if (existing.quantity >= 5) return prev
         return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         )
       }
       return [...prev, { ...product, quantity: 1 }]
@@ -42,9 +71,7 @@ export function CartProvider({ children }) {
     }
     if (quantity > 5) return
     setCartItems(prev =>
-      prev.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      )
+      prev.map(item => item.id === productId ? { ...item, quantity } : item)
     )
   }
 
@@ -53,17 +80,11 @@ export function CartProvider({ children }) {
   }
 
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0)
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
+  const cartTotal  = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
 
   return (
     <CartContext.Provider value={{
-      cartItems,
-      addToCart,
-      removeFromCart,
-      updateQuantity,
-      clearCart,
-      cartCount,
-      cartTotal
+      cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal
     }}>
       {children}
     </CartContext.Provider>
@@ -72,8 +93,6 @@ export function CartProvider({ children }) {
 
 export function useCart() {
   const context = useContext(CartContext)
-  if (!context) {
-    throw new Error('useCart must be used inside CartProvider')
-  }
+  if (!context) throw new Error('useCart must be used inside CartProvider')
   return context
 }
