@@ -60,7 +60,7 @@ def initialize_payment(
         "email": data.email,
         "amount": amount_in_kobo,
         "reference": f"MART-{order.id}-{uuid.uuid4().hex[:10]}",
-        "callback_url": "http://localhost:5173/payment/callback",
+        "callback_url": f"{os.getenv('FRONTEND_URL', 'http://localhost:5173')}/payment/callback",
         "metadata": {
             "order_id": order.id,
             "user_id": current_user.id

@@ -153,12 +153,32 @@ function ProductForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Category *</label>
-              <input type="text" name="category" value={formData.category} onChange={handleChange} required
-                placeholder="e.g. Electronics, Fashion, Home"
-                className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
-                style={inputStyle} onFocus={handleFocus} onBlur={handleBlur} />
-            </div>
+  <label
+    className="block text-sm font-medium mb-1.5"
+    style={{ color: 'var(--text)' }}
+  >
+    Category *
+  </label>
+
+  <select
+    name="category"
+    value={formData.category}
+    onChange={handleChange}
+    required
+    className="w-full px-4 py-3 rounded-xl text-sm focus:outline-none transition-all"
+    style={inputStyle}
+    onFocus={handleFocus}
+    onBlur={handleBlur}
+  >
+    <option value="">Select a category</option>
+    <option value="Electronics">Electronics</option>
+    <option value="Fashion">Fashion</option>
+    <option value="Home">Home</option>
+    <option value="Beauty">Beauty</option>
+    <option value="Food">Food</option>
+    <option value="Sports">Sports</option>
+  </select>
+</div>
 
             <div>
               <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text)' }}>Image URL</label>
