@@ -55,21 +55,21 @@ function Payment() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-2xl p-6" style={{ border: '1px solid var(--border)' }}>
 
           {/* Order Summary */}
           {orderInfo && (
-            <div className="bg-indigo-50 rounded-xl p-4 mb-6">
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(245,158,11,0.08)' }}>
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-sm font-medium text-indigo-900">
+                  <p className="text-sm font-medium" style={{ color: 'var(--primary)' }}>
                     Order #{orderInfo.orderId}
                   </p>
-                  <p className="text-xs text-indigo-600 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: '#d97706' }}>
                     {orderInfo.userEmail}
                   </p>
                 </div>
-                <p className="text-xl font-bold text-indigo-600">
+                <p className="text-xl font-bold" style={{ color: '#f59e0b' }}>
                   ₦{orderInfo.orderTotal?.toLocaleString()}
                 </p>
               </div>
@@ -78,11 +78,15 @@ function Payment() {
 
           {/* Error */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-5 text-sm">
+            <div
+              className="px-4 py-3 rounded-xl mb-5 text-sm"
+              style={{ background: 'rgba(244,63,94,0.08)', color: '#e11d48', border: '1px solid rgba(244,63,94,0.2)' }}
+            >
               {error}
               <button
                 onClick={() => orderInfo && initializePayment(orderInfo.orderId, orderInfo.userEmail)}
-                className="block text-red-600 font-medium mt-1 hover:underline"
+                className="block font-medium mt-1 hover:underline"
+                style={{ color: '#e11d48' }}
               >
                 Try again
               </button>
@@ -92,8 +96,11 @@ function Payment() {
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-6">
-              <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-              <span className="ml-3 text-gray-500 text-sm">Initializing payment...</span>
+              <div
+                className="w-8 h-8 border-4 rounded-full animate-spin"
+                style={{ borderColor: 'var(--border)', borderTopColor: '#f59e0b' }}
+              ></div>
+              <span className="ml-3 text-sm" style={{ color: 'var(--muted)' }}>Initializing payment...</span>
             </div>
           )}
 
@@ -101,7 +108,8 @@ function Payment() {
           {reference && !loading && (
             <button
               onClick={openPaystackPopup}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full font-bold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-white"
+              style={{ background: '#f59e0b' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
