@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import API from '../../api/axios'
 
 const STAT_CARDS = [
-  { key: 'totalProducts', label: 'Total Products' },
   { key: 'inStock',       label: 'In Stock' },
   { key: 'lowStock',      label: 'Low Stock' },
   { key: 'outOfStock',    label: 'Out of Stock' },
@@ -124,7 +123,7 @@ function AdminLayout({ children }) {
         </button>
       </div>
 
-      <main className="flex-1 md:ml-64 min-h-screen pt-14 md:pt-0">
+      <main className="flex-1 md:ml-64 min-h-screen pt-14 md:pt-0 overflow-x-hidden">
         {children}
       </main>
     </div>
@@ -175,40 +174,64 @@ function Dashboard() {
           <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Here is what is happening in your store today</p>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl p-5 sm:p-6 animate-pulse" style={{ border: '1px solid var(--border)' }}>
-                <div className="h-6 w-16 rounded mb-2" style={{ background: 'var(--bg)' }}></div>
-                <div className="h-4 w-24 rounded" style={{ background: 'var(--bg)' }}></div>
-              </div>
-            ))}
+          {loading ? (
+          <div className="space-y-3 sm:space-y-4 mb-8">
+            <div className="bg-white rounded-2xl p-5 sm:p-6 animate-pulse" style={{ border: '1px solid var(--border)' }}>
+              <div className="h-8 w-32 rounded mb-2" style={{ background: 'var(--bg)' }}></div>
+              <div className="h-4 w-24 rounded" style={{ background: 'var(--bg)' }}></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 sm:p-6 animate-pulse" style={{ border: '1px solid var(--border)' }}>
+                  <div className="h-6 w-16 rounded mb-2" style={{ background: 'var(--bg)' }}></div>
+                  <div className="h-4 w-24 rounded" style={{ background: 'var(--bg)' }}></div>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 sm:p-6 animate-pulse" style={{ border: '1px solid var(--border)' }}>
+                  <div className="h-6 w-16 rounded mb-2" style={{ background: 'var(--bg)' }}></div>
+                  <div className="h-4 w-24 rounded" style={{ background: 'var(--bg)' }}></div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
+          <div className="space-y-3 sm:space-y-4 mb-8">
+
+            {/* Revenue — hero row, full width */}
             <div className="bg-white rounded-2xl p-5 sm:p-6 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
-              <p className="text-xl sm:text-2xl lg:text-3xl font-black mb-1 truncate" style={{ color: '#f59e0b' }}>₦{stats.revenue.toLocaleString()}</p>
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-black mb-1 truncate" style={{ color: '#f59e0b' }}>
+                ₦{stats.revenue.toLocaleString()}
+              </p>
               <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Revenue</p>
             </div>
-            <div className="bg-white rounded-2xl p-5 sm:p-6" style={{ border: '1px solid var(--border)' }}>
-              <p className="text-2xl sm:text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>{stats.totalOrders}</p>
-              <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Orders</p>
+
+            {/* Orders + Products — side by side */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div className="bg-white rounded-2xl p-5 sm:p-6 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                <p className="text-xl sm:text-2xl font-black mb-1 truncate" style={{ color: 'var(--primary)' }}>{stats.totalOrders}</p>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Orders</p>
+              </div>
+              <div className="bg-white rounded-2xl p-5 sm:p-6 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                <p className="text-xl sm:text-2xl font-black mb-1 truncate" style={{ color: 'var(--primary)' }}>{stats.totalProducts}</p>
+                <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Products</p>
+              </div>
             </div>
-            <div className="bg-white rounded-2xl p-5 sm:p-6" style={{ border: '1px solid var(--border)' }}>
-              <p className="text-2xl sm:text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>{stats.totalProducts}</p>
-              <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Products</p>
+
+            {/* Stock breakdown — three across */}
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
+              {STAT_CARDS.map(card => (
+                <div key={card.key} className="bg-white rounded-2xl p-3 sm:p-6 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+                  <p className="text-lg sm:text-2xl font-black mb-1 truncate" style={{ color: 'var(--primary)' }}>{stats[card.key]}</p>
+                  <p className="text-[10px] sm:text-sm truncate" style={{ color: 'var(--muted)' }}>{card.label}</p>
+                </div>
+              ))}
             </div>
+
           </div>
         )}
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {STAT_CARDS.map(card => (
-            <div key={card.key} className="bg-white rounded-2xl p-5 sm:p-6" style={{ border: '1px solid var(--border)' }}>
-              <p className="text-2xl sm:text-3xl font-black mb-1" style={{ color: 'var(--primary)' }}>{stats[card.key]}</p>
-              <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>{card.label}</p>
-            </div>
-          ))}
-        </div>
     
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

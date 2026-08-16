@@ -62,23 +62,23 @@ function AdminOrders() {
 
         {/* Revenue summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div className="bg-white rounded-2xl p-4 sm:p-5" style={{ border: '1px solid var(--border)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>Total Orders</p>
-            <p className="text-xl sm:text-2xl font-black" style={{ color: 'var(--primary)' }}>{orders.length}</p>
+          <div className="bg-white rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 truncate" style={{ color: 'var(--muted)' }}>Total Orders</p>
+            <p className="text-lg sm:text-2xl font-black truncate" style={{ color: 'var(--primary)' }}>{orders.length}</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 sm:p-5" style={{ border: '1px solid var(--border)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>Revenue</p>
-            <p className="text-xl sm:text-2xl font-black" style={{ color: '#f59e0b' }}>₦{totalRevenue.toLocaleString()}</p>
+          <div className="bg-white rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 truncate" style={{ color: 'var(--muted)' }}>Revenue</p>
+            <p className="text-lg sm:text-2xl font-black truncate" style={{ color: '#f59e0b' }}>₦{totalRevenue.toLocaleString()}</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 sm:p-5" style={{ border: '1px solid var(--border)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>Pending</p>
-            <p className="text-xl sm:text-2xl font-black" style={{ color: '#d97706' }}>
+          <div className="bg-white rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 truncate" style={{ color: 'var(--muted)' }}>Pending</p>
+            <p className="text-lg sm:text-2xl font-black truncate" style={{ color: '#d97706' }}>
               {orders.filter(o => o.status === 'pending').length}
             </p>
           </div>
-          <div className="bg-white rounded-2xl p-4 sm:p-5" style={{ border: '1px solid var(--border)' }}>
-            <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--muted)' }}>Delivered</p>
-            <p className="text-xl sm:text-2xl font-black" style={{ color: '#059669' }}>
+          <div className="bg-white rounded-2xl p-3 sm:p-5 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-1 truncate" style={{ color: 'var(--muted)' }}>Delivered</p>
+            <p className="text-lg sm:text-2xl font-black truncate" style={{ color: '#059669' }}>
               {orders.filter(o => o.status === 'delivered').length}
             </p>
           </div>
