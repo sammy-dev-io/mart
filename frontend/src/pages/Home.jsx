@@ -5,100 +5,101 @@ import { useCart } from '../context/CartContext'
 
 
 // ── Product Card ─────────────────────────────────────────────
-function ProductCard({ product }) {
-  const { addToCart } = useCart()
-
+function ProductCard({ product, onAddToCart }) {
   const discount = product.original_price && product.original_price > product.price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
     : null
 
-  return (
-    <div
-      className="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
-  style={{ border: '1px solid var(--border)', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-    >
-    <Link to={`/products/${product.id}`} className="block">
+  const stockColor = {
+    in:  'text-green-600 bg-green-50',
+    low: 'text-yellow-600 bg-yellow-50',
+    out: 'text-red-600 bg-red-50'
+  }
 
-      {/* Image */}
-      <div className="relative overflow-hidden bg-zinc-50 w-full" style={{ aspectRatio: '4/3' }}>
+  const stockLabel = {
+    in:  'In Stock',
+    low: 'Low Stock',
+    out: 'Out of Stock'
+  }
+
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group flex flex-col h-full">
+
+      <div className="relative overflow-hidden bg-gray-50 w-full" style={{ aspectRatio: '4/3' }}>
         <img
           src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=No+Image' }}
         />
 
-        {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+          {product.badge === 'hot' && (
+            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              🔥 Hot
+            </span>
+          )}
           {discount && (
-            <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#f43f5e' }}>
+            <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
               -{discount}%
             </span>
           )}
           {product.badge === 'new' && (
-            <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#10b981' }}>
+            <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
               New
             </span>
           )}
-          {product.badge === 'hot' && (
-            <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#f59e0b' }}>
-              Hot
-            </span>
-          )}
         </div>
-
-        {product.stock === 'out' && (
-          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-            <span className="text-xs font-bold text-zinc-500 bg-white px-3 py-1 rounded-full" style={{ border: '1px solid var(--border)' }}>
-              Out of Stock
-            </span>
-          </div>
-        )}
-        
       </div>
-        
-      {/* Info */}
-      </Link>
-      <div className="p-3.5">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#f59e0b' }}>
+
+      <div className="p-3 flex flex-col flex-1">
+        <p className="text-xs text-indigo-600 font-medium uppercase tracking-wide mb-1 truncate">
           {product.category}
         </p>
-        <h3 className="text-sm font-semibold leading-snug mb-2 line-clamp-2" style={{ color: 'var(--primary)' }}>
+        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 leading-snug min-h-[2.5rem]">
           {product.name}
         </h3>
 
-        <div className="flex items-center gap-1.5 mb-3">
+        <div className="flex items-center gap-1 mb-2">
           <div className="flex">
             {[...Array(5)].map((_, i) => (
-              <svg key={i} className="w-3 h-3" fill={i < Math.floor(product.rating) ? '#f59e0b' : '#e4e4e7'} viewBox="0 0 20 20">
+              <svg
+                key={i}
+                className={`w-3 h-3 flex-shrink-0 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-200'}`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             ))}
           </div>
-          <span className="text-xs" style={{ color: 'var(--muted)' }}>{product.rating}</span>
+          <span className="text-xs text-gray-400 flex-shrink-0">{product.rating}</span>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-base font-bold" style={{ color: 'var(--primary)' }}>
-              ₦{product.price.toLocaleString()}
+        {/* This spacer pushes price+button to the bottom regardless of content above */}
+        <div className="flex-1"></div>
+
+        <div className="flex items-baseline gap-1 mb-2 flex-wrap">
+          <span className="text-sm font-bold text-gray-900 truncate">
+            ₦{product.price.toLocaleString()}
+          </span>
+          {product.original_price && (
+            <span className="text-xs text-gray-400 line-through truncate">
+              ₦{product.original_price.toLocaleString()}
             </span>
-            {product.original_price && (
-              <span className="text-xs line-through ml-1.5" style={{ color: 'var(--muted)' }}>
-                ₦{product.original_price.toLocaleString()}
-              </span>
-            )}
-          </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${stockColor[product.stock]}`}>
+            {stockLabel[product.stock]}
+          </span>
           <button
-            onClick={() => addToCart(product)}
+            onClick={() => onAddToCart(product)}
             disabled={product.stock === 'out'}
-            className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
-            style={{
-              background: product.stock === 'out' ? 'var(--border)' : '#f59e0b',
-              color: product.stock === 'out' ? 'var(--muted)' : '#fff'
-            }}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex-shrink-0 whitespace-nowrap"
           >
-            Add
+            {product.stock === 'out' ? 'Sold Out' : '+ Add'}
           </button>
         </div>
       </div>
