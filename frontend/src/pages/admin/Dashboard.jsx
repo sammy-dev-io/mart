@@ -186,8 +186,8 @@ function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
-            <div className="bg-white rounded-2xl p-5 sm:p-6" style={{ border: '1px solid var(--border)' }}>
-              <p className="text-2xl sm:text-3xl font-black mb-1" style={{ color: '#f59e0b' }}>₦{stats.revenue.toLocaleString()}</p>
+            <div className="bg-white rounded-2xl p-5 sm:p-6 overflow-hidden" style={{ border: '1px solid var(--border)' }}>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-black mb-1 truncate" style={{ color: '#f59e0b' }}>₦{stats.revenue.toLocaleString()}</p>
               <p className="text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>Total Revenue</p>
             </div>
             <div className="bg-white rounded-2xl p-5 sm:p-6" style={{ border: '1px solid var(--border)' }}>

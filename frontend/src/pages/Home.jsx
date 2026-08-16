@@ -20,7 +20,7 @@ function ProductCard({ product }) {
     <Link to={`/products/${product.id}`} className="block">
 
       {/* Image */}
-      <div className="relative overflow-hidden bg-zinc-50" style={{ aspectRatio: '4/3' }}>
+      <div className="relative overflow-hidden bg-zinc-50 w-full" style={{ aspectRatio: '4/3' }}>
         <img
           src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
           alt={product.name}

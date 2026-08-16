@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import API from '../api/axios'
-import { useCart } from '../context/CartContext'  
-import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 
-const CATEGORIES = [
-  'All', 'Electronics', 'Fashion', 'Home', 'Beauty', 'Food', 'Sports'
-]
+const CATEGORIES = ['All', 'Electronics', 'Fashion', 'Home', 'Beauty', 'Food', 'Sports']
 
 const SORT_OPTIONS = [
   { value: 'default',    label: 'Featured' },
@@ -16,18 +13,122 @@ const SORT_OPTIONS = [
   { value: 'name',       label: 'Name: A-Z' },
 ]
 
+function ProductCard({ product }) {
+  const { addToCart } = useCart()
+
+  const discount = product.original_price && product.original_price > product.price
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    : null
+
+  const stockStyles = {
+    in:  { bg: 'rgba(16,185,129,0.1)', text: '#059669' },
+    low: { bg: 'rgba(245,158,11,0.1)', text: '#d97706' },
+    out: { bg: 'rgba(244,63,94,0.1)',  text: '#e11d48' },
+  }
+  const stockLabel = { in: 'In Stock', low: 'Low Stock', out: 'Out of Stock' }
+
+  return (
+    <div
+      className="group bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+      style={{ border: '1px solid var(--border)' }}
+    >
+      <Link to={`/products/${product.id}`} className="block">
+        <div className="relative overflow-hidden bg-zinc-50" style={{ aspectRatio: '4/3' }}>
+          <img
+            src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=No+Image' }}
+          />
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+            {discount && (
+              <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#f43f5e' }}>
+                -{discount}%
+              </span>
+            )}
+            {product.badge === 'new' && (
+              <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#10b981' }}>
+                New
+              </span>
+            )}
+            {product.badge === 'hot' && (
+              <span className="text-white text-xs font-bold px-2 py-0.5 rounded-md" style={{ background: '#f59e0b' }}>
+                Hot
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      <div className="p-3.5">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#f59e0b' }}>
+          {product.category}
+        </p>
+        <Link to={`/products/${product.id}`}>
+          <h3 className="text-sm font-semibold leading-snug mb-2 line-clamp-2" style={{ color: 'var(--primary)' }}>
+            {product.name}
+          </h3>
+        </Link>
+
+        <div className="flex items-center gap-1.5 mb-3">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <svg key={i} className="w-3 h-3" fill={i < Math.floor(product.rating) ? '#f59e0b' : '#e4e4e7'} viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <span className="text-xs" style={{ color: 'var(--muted)' }}>{product.rating}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-base font-bold" style={{ color: 'var(--primary)' }}>
+              ₦{product.price.toLocaleString()}
+            </span>
+            {product.original_price && (
+              <span className="text-xs line-through ml-1.5" style={{ color: 'var(--muted)' }}>
+                ₦{product.original_price.toLocaleString()}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => addToCart(product)}
+            disabled={product.stock === 'out'}
+            className="text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+            style={{
+              background: product.stock === 'out' ? 'var(--border)' : '#f59e0b',
+              color: product.stock === 'out' ? 'var(--muted)' : '#fff'
+            }}
+          >
+            Add
+          </button>
+        </div>
+
+        <div className="mt-2">
+          <span
+            className="text-xs font-medium px-2 py-0.5 rounded-full"
+            style={{ background: stockStyles[product.stock].bg, color: stockStyles[product.stock].text }}
+          >
+            {stockLabel[product.stock]}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Products() {
-  const [products, setProducts]         = useState([])
-  const [filtered, setFiltered]         = useState([])
-  const [loading, setLoading]           = useState(true)
-  const [search, setSearch]             = useState('')
-  const [category, setCategory]         = useState('All')
-  const [sort, setSort]                 = useState('default')
-  const [priceRange, setPriceRange]     = useState({ min: '', max: '' })
-  const [showFilter, setShowFilter]     = useState(false)
-  const [inStockOnly, setInStockOnly]   = useState(false)
-  const [searchParams]                  = useSearchParams()
-  const { addToCart }                   = useCart()
+  const [products, setProducts]     = useState([])
+  const [filtered, setFiltered]     = useState([])
+  const [loading, setLoading]       = useState(true)
+  const [search, setSearch]         = useState('')
+  const [category, setCategory]     = useState('All')
+  const [sort, setSort]             = useState('default')
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' })
+  const [showFilter, setShowFilter] = useState(false)
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [searchParams]              = useSearchParams()
 
   useEffect(() => {
     fetchProducts()
@@ -36,12 +137,9 @@ function Products() {
   useEffect(() => {
     const cat = searchParams.get('category')
     if (cat) setCategory(cat)
+    const searchParam = searchParams.get('search')
+    if (searchParam) setSearch(searchParam)
   }, [searchParams])
-
-  useEffect(() => {
-  const searchParam = searchParams.get('search')
-  if (searchParam) setSearch(searchParam)
-}, [searchParams])
 
   useEffect(() => {
     applyFilters()
@@ -71,9 +169,7 @@ function Products() {
     }
 
     if (category !== 'All') {
-      result = result.filter(p =>
-        p.category.toLowerCase() === category.toLowerCase()
-      )
+      result = result.filter(p => p.category.toLowerCase() === category.toLowerCase())
     }
 
     if (inStockOnly) {
@@ -113,23 +209,24 @@ function Products() {
     priceRange.max !== ''
   ].filter(Boolean).length
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  const inputStyle = { border: '1px solid var(--border)' }
+  const handleFocus = (e) => e.target.style.borderColor = '#f59e0b'
+  const handleBlur  = (e) => e.target.style.borderColor = 'var(--border)'
 
-      {/* Page Header */}
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ background: 'var(--bg)' }}>
+
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Products</h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <h1 className="text-xl sm:text-2xl font-black" style={{ color: 'var(--primary)' }}>All Products</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
           {loading ? 'Loading...' : `${filtered.length} products found`}
         </p>
       </div>
 
-      {/* Search + Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
 
-        {/* Search */}
         <div className="flex-1 relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" fill="none" stroke="var(--muted)" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
@@ -137,111 +234,112 @@ function Products() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search products..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none transition-all"
+            style={inputStyle} onFocus={handleFocus} onBlur={handleBlur}
           />
         </div>
-        <div className="flex gap-3">
-        {/* Sort */}
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
-        >
-          {SORT_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
-          ))}
-        </select>
 
-        {/* Filter Button */}
-        <button
-          onClick={() => setShowFilter(!showFilter)}
-          className="relative flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-          </svg>
-          Filter
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
+        <div className="flex gap-3">
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="rounded-xl px-3 py-2.5 text-sm focus:outline-none bg-white flex-1 sm:flex-none"
+            style={inputStyle}
+          >
+            {SORT_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+
+          <button
+            onClick={() => setShowFilter(!showFilter)}
+            className="relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors flex-shrink-0"
+            style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+            </svg>
+            Filter
+            {activeFilterCount > 0 && (
+              <span
+                className="absolute -top-1.5 -right-1.5 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold"
+                style={{ background: '#f59e0b' }}
+              >
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
-    </div>
-      {/* Category Chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
+
+      <div className="flex gap-2 overflow-x-auto pb-2 mb-6" style={{ scrollbarWidth: 'none' }}>
         {CATEGORIES.map(cat => (
           <button
             key={cat}
             onClick={() => setCategory(cat)}
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              category === cat
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'
-            }`}
+            className="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
+            style={{
+              background: category === cat ? 'var(--primary)' : '#fff',
+              color: category === cat ? '#fff' : 'var(--text)',
+              border: '1px solid var(--border)'
+            }}
           >
             {cat}
           </button>
         ))}
       </div>
 
-      {/* Filter Drawer — mobile style slide down */}
       {showFilter && (
-        <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6 shadow-sm">
+        <div className="bg-white rounded-2xl p-5 mb-6" style={{ border: '1px solid var(--border)' }}>
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-900">Filters</h3>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-indigo-600 hover:underline"
-            >
+            <h3 className="font-semibold" style={{ color: 'var(--primary)' }}>Filters</h3>
+            <button onClick={clearFilters} className="text-sm" style={{ color: '#f59e0b' }}>
               Clear all
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-            {/* Availability */}
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Availability</p>
+              <p className="text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>Availability</p>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={inStockOnly}
                   onChange={(e) => setInStockOnly(e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                  className="w-4 h-4 rounded"
+                  style={{ accentColor: '#f59e0b' }}
                 />
-                <span className="text-sm text-gray-600">In stock only</span>
+                <span className="text-sm" style={{ color: 'var(--muted)' }}>In stock only</span>
               </label>
             </div>
 
-            {/* Price Range */}
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-2">Price Range (₦)</p>
+              <p className="text-sm font-medium mb-2" style={{ color: 'var(--text)' }}>Price Range (₦)</p>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
                   placeholder="Min"
                   value={priceRange.min}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  style={inputStyle} onFocus={handleFocus} onBlur={handleBlur}
                 />
-                <span className="text-gray-400 text-sm">to</span>
+                <span className="text-sm" style={{ color: 'var(--muted)' }}>to</span>
                 <input
                   type="number"
                   placeholder="Max"
                   value={priceRange.max}
                   onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  style={inputStyle} onFocus={handleFocus} onBlur={handleBlur}
                 />
               </div>
             </div>
 
-            {/* Results count + apply */}
             <div className="flex items-end">
               <button
                 onClick={() => setShowFilter(false)}
-                className="w-full bg-indigo-600 text-white py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                className="w-full py-2 rounded-xl text-sm font-semibold text-white transition-colors"
+                style={{ background: '#f59e0b' }}
               >
                 See {filtered.length} results
               </button>
@@ -251,120 +349,32 @@ function Products() {
         </div>
       )}
 
-      {/* Products Grid */}
       {loading ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
-              <div className="bg-gray-200 h-48"></div>
+            <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse" style={{ border: '1px solid var(--border)' }}>
+              <div className="bg-zinc-100" style={{ aspectRatio: '4/3' }}></div>
               <div className="p-4 space-y-2">
-                <div className="bg-gray-200 h-4 rounded w-3/4"></div>
-                <div className="bg-gray-200 h-4 rounded w-1/2"></div>
-                <div className="bg-gray-200 h-8 rounded w-full mt-4"></div>
+                <div className="h-4 rounded w-3/4" style={{ background: 'var(--bg)' }}></div>
+                <div className="h-4 rounded w-1/2" style={{ background: 'var(--bg)' }}></div>
+                <div className="h-8 rounded w-full mt-4" style={{ background: 'var(--bg)' }}></div>
               </div>
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-20">
-          <div className="text-5xl mb-4">🔍</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-          <p className="text-gray-500 text-sm mb-4">Try adjusting your search or filters</p>
-          <button
-            onClick={clearFilters}
-            className="text-indigo-600 font-medium text-sm hover:underline"
-          >
+          <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--primary)' }}>No products found</h3>
+          <p className="text-sm mb-4" style={{ color: 'var(--muted)' }}>Try adjusting your search or filters</p>
+          <button onClick={clearFilters} className="text-sm font-medium" style={{ color: '#f59e0b' }}>
             Clear all filters
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map(product => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={addToCart}
-            />
-          ))}
+          {filtered.map(product => <ProductCard key={product.id} product={product} />)}
         </div>
       )}
-    </div>
-  )
-}
-
-function ProductCard({ product, onAddToCart }) {
-  const discount = product.original_price && product.original_price > product.price
-    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-    : null
-
-  const stockColor = {
-    in:  'text-green-600 bg-green-50',
-    low: 'text-yellow-600 bg-yellow-50',
-    out: 'text-red-600 bg-red-50'
-  }
-
-  const stockLabel = {
-    in: 'In Stock', low: 'Low Stock', out: 'Out of Stock'
-  }
-
-  return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
-  <Link to={`/products/${product.id}`} className="block">
-  <div className="relative overflow-hidden bg-gray-50 h-48">
-        <img
-          src={product.image || 'https://via.placeholder.com/400x300?text=No+Image'}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => { e.target.src = 'https://via.placeholder.com/400x300?text=No+Image' }}
-        />
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {product.badge === 'hot' && (
-            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">🔥 Hot</span>
-          )}
-          {discount && (
-            <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-{discount}%</span>
-          )}
-          {product.badge === 'new' && (
-            <span className="bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">New</span>
-          )}
-        </div>
-      </div>
-    </Link>
-      <div className="p-3">
-        <p className="text-xs text-indigo-600 font-medium uppercase tracking-wide mb-1">{product.category}</p>
-        <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 leading-snug">{product.name}</h3>
-
-        <div className="flex items-center gap-1 mb-2">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <svg key={i} className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-          <span className="text-xs text-gray-400">{product.rating}</span>
-        </div>
-
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-base font-bold text-gray-900">₦{product.price.toLocaleString()}</span>
-          {product.original_price && (
-            <span className="text-xs text-gray-400 line-through">₦{product.original_price.toLocaleString()}</span>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${stockColor[product.stock]}`}>
-            {stockLabel[product.stock]}
-          </span>
-          <button
-            onClick={() => onAddToCart(product)}
-            disabled={product.stock === 'out'}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-          >
-            {product.stock === 'out' ? 'Sold Out' : '+ Add'}
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

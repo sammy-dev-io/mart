@@ -6,6 +6,8 @@ from app.schemas.user import UserRegister, UserLogin, UserResponse, Token
 from app.utils.auth import get_admin_user, hash_password, verify_password, create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 from app.utils.auth import get_current_user
+import secrets
+from app.utils.email import send_verification_email
 
 router = APIRouter(
     prefix="/auth",
@@ -14,7 +16,6 @@ router = APIRouter(
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
-    # Check if email already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
         raise HTTPException(
@@ -22,19 +23,23 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
 
-    # Hash the password
     hashed = hash_password(user_data.password)
+    token = secrets.token_urlsafe(32)
 
-    # Create the new user
     new_user = User(
         email=user_data.email,
         full_name=user_data.full_name,
-        password=hashed
+        password=hashed,
+        verification_token=token,
+        is_verified=False
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    send_verification_email(new_user.email, new_user.full_name, token)
+
     return new_user
 
 

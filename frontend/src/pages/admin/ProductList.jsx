@@ -55,7 +55,7 @@ function ProductList() {
           <h1 className="text-xl sm:text-2xl font-black" style={{ color: 'var(--primary)' }}>All Products</h1>
           <Link
             to="/admin/products/new"
-            className="text-center font-bold px-4 py-2.5 rounded-xl text-sm text-white transition-all"
+            className="text-center font-bold px-4 py-2.5 rounded-xl text-sm text-white transition-all whitespace-nowrap"
             style={{ background: '#f59e0b' }}
           >
             + Add Product

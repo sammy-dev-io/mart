@@ -137,15 +137,15 @@ function AdminOrders() {
                       <p className="text-xs mt-1 truncate" style={{ color: 'var(--muted)' }}>{order.address}</p>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-shrink-0">
-                      <p className="font-black text-base sm:text-lg" style={{ color: 'var(--primary)' }}>
+                    <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
+                      <p className="font-black text-sm sm:text-lg" style={{ color: 'var(--primary)' }}>
                         ₦{order.total.toLocaleString()}
                       </p>
                       <select
                         value={order.status}
                         onChange={(e) => updateStatus(order.id, e.target.value)}
                         disabled={updating === order.id}
-                        className="text-xs font-semibold px-3 py-2 rounded-lg capitalize"
+                        className="text-xs font-semibold px-2 sm:px-3 py-2 rounded-lg capitalize max-w-[110px] sm:max-w-none"
                         style={{ border: '1px solid var(--border)', background: '#fff', color: 'var(--text)' }}
                       >
                         {STATUS_OPTIONS.map(s => (
